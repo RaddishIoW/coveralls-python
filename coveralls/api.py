@@ -198,6 +198,10 @@ class Coveralls:
         number = os.environ.get('COVERALLS_SERVICE_JOB_NUMBER')
         if number:
             self.config['service_number'] = number
+        
+        base_path = os.environ.get('COVERALLS_BASE_PATH')
+        if base_path:
+            self.config['base_path'] = base_path
 
     def load_config_from_file(self):
         try:
@@ -353,6 +357,13 @@ class Coveralls:
         self._data = {'source_files': self.get_coverage()}
         self._data.update(git_info())
         self._data.update(self.config)
+        if self.config['base_path']:
+            _modified_source_files = []
+            _base_path = self.config['base_path']
+            for source_file in self._data['source_files']:
+                source_file['name'] = _base_path + source_file['name']
+                _modified_source_files.append(source_file)
+            self._data['source_files'] = _modified_source_files
         if extra:
             if 'source_files' in extra:
                 self._data['source_files'].extend(extra['source_files'])
